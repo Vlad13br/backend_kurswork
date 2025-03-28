@@ -1,0 +1,144 @@
+<?php
+
+require_once '../vendor/autoload.php';
+require_once '../models/Product.php';
+require_once '../models/Category.php';
+require_once  '../models/Brand.php';
+
+use Cloudinary\Api\Upload\UploadApi;
+use Cloudinary\Configuration\Configuration;
+
+class ProductController
+{
+    public function index()
+    {
+        $productModel = new Product();
+        $products = $productModel->getAllProducts();
+        require '../views/home.php';
+    }
+
+    public function getProduct($params){
+        $productModel = new Product();
+        $product = $productModel->getProductById($params['id']);
+        if (!$product) {
+            include '../views/404.php';
+            exit;
+        }
+        $additionalScripts = '/scripts/product/product.js';
+        require '../views/products/productPage.php';
+    }
+
+
+    public function showProductForm()
+    {
+        $categoryModel = new Category();
+        $categories = $categoryModel->getAllCategories();
+
+        $brandModel = new Brand();
+        $brands = $brandModel->getAllBrands();
+        $additionalScripts = '/scripts/brand/brands.js';
+        require '../views/products/create_product.php';
+    }
+
+    public function store()
+    {
+        $categoryId = $_POST['category_id'];
+        $name = $_POST['name'];
+        $description = $_POST['description'];
+        $price = $_POST['price'];
+        $stock = $_POST['stock'];
+        $brandId = $_POST['brand_id'];
+        $discount = $_POST['discount'] ?? 0;
+
+        $attributes = [];
+        if (isset($_POST['attributes'])) {
+            foreach ($_POST['attributes'] as $key => $value) {
+                $attributes[] = [
+                    'attribute_name' => $key,
+                    'attribute_value' => $value,
+                ];
+            }
+        }
+
+        $images = $_FILES['images'] ?? [];
+
+        $productModel = new Product();
+        $productId = $productModel->createProduct($name, $description, $price, $stock, $categoryId, $brandId, $discount, $attributes);
+
+        if ($productId) {
+            $mainImageIndex = $_POST['main_image'] ?? 0;
+// винеси кудись підключення
+            if (!empty($images['name'][0])) {
+                Configuration::instance('CLOUDINARY_URL=cloudinary://918711713775825:ulriMmQH4x1IqPbO7xE_u8EgEcc@deugymr0b');
+                $upload = new UploadApi();
+
+                foreach ($images['tmp_name'] as $key => $tmpName) {
+                    $uploadedFile = $upload->upload($tmpName);
+                    $imageUrl = $uploadedFile['secure_url'];
+                    $isMain = ($key == $mainImageIndex) ? true : false;
+
+                    if (!$productModel->saveProductImage($productId, $imageUrl, $isMain)) {
+                        echo "Помилка при додаванні зображення.";
+                    }
+                }
+            }
+
+            header('Location: /');
+            exit;
+        } else {
+            echo "Помилка при створенні продукту.";
+        }
+    }
+
+    public function getCategoryAttributes()
+    {
+        if (isset($_GET['category_id'])) {
+            $categoryId = $_GET['category_id'];
+
+            $categoryModel = new Category();
+            $attributes = $categoryModel->getCategoryAttributes($categoryId);
+
+            echo json_encode($attributes);
+        } else {
+            echo json_encode([]);
+        }
+    }
+    public function editProduct($params)
+    {
+        $productModel = new Product();
+        $product = $productModel->getProductToUpdateById($params['id']);
+
+        if (!$product) {
+            include '../views/404.php';
+            exit;
+        }
+
+        require '../views/products/edit_product.php';
+    }
+
+    public function updateProduct($params)
+    {
+        $productId = $params['id'];
+        $name = $_POST['name'] ?? '';
+        $description = $_POST['description'] ?? '';
+        $price = $_POST['price'] ?? 0;
+        $stock = $_POST['stock'] ?? 0;
+        $discount = $_POST['discount'] ?? 0;
+
+        if (empty($name) || empty($description) || empty($price) || empty($stock)) {
+            return;
+        }
+
+        $productModel = new Product();
+        $updated = $productModel->updateProduct($productId, $name, $description, $price, $stock,  $discount);
+
+        if ($updated) {
+            header('Location: /product/' . $productId);
+            exit;
+        } else {
+            echo "Error updating product.";
+        }
+    }
+
+
+}

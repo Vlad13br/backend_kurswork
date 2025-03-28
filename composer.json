@@ -1,0 +1,7 @@
+{
+    "require": {
+        "altorouter/altorouter": "^2.0",
+        "google/apiclient": "^2.18",
+        "cloudinary/cloudinary_php": "^3.1"
+    }
+}
