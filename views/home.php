@@ -1,30 +1,91 @@
 <?php
 
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
 $title = 'Головна';
 ob_start();
 ?>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <?php foreach ($products as $product): ?>
-        <a href="/product/<?= $product['product_id'] ?>" class="flex flex-col">
+        <div class="flex flex-col h-full">
             <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white p-2 border border-gray-300 transition-transform transform hover:scale-105 hover:shadow-xl hover:border-blue-500 cursor-pointer flex flex-col h-full">
-                <?php if (!empty($product['main_image'])): ?>
-                    <img class="w-full h-80 object-contain mb-4 rounded-lg" src="<?= htmlspecialchars($product['main_image']) ?>" alt="Зображення товару">
-                <?php endif; ?>
-                <div class="p-4 flex-grow">
-                    <p class="text-xl font-semibold text-gray-800 mb-2"><?= htmlspecialchars($product['product_name']) ?></p>
-
-                    <?php if (!empty($product['product_discount']) && $product['product_discount'] > 0): ?>
-                        <p class="text-lg font-medium text-gray-400 line-through mb-2"><?= htmlspecialchars($product['product_price']) ?> грн</p>
-                        <p class="text-xl font-semibold text-red-500 mb-2">
-                            <?= number_format($product['product_price'] * (1 - $product['product_discount'] / 100), 2) ?> грн
-                        </p>
-                    <?php else: ?>
-                        <p class="text-lg font-medium text-gray-800 mb-2"><?= htmlspecialchars($product['product_price']) ?> грн</p>
+                <a href="/product/<?= $product['product_id'] ?>">
+                    <?php if (!empty($product['main_image'])): ?>
+                        <img class="w-full h-80 object-contain mb-4 rounded-lg" src="<?= htmlspecialchars($product['main_image']) ?>" alt="Зображення товару">
                     <?php endif; ?>
-                </div>
+                    <p class="text-xl font-semibold text-gray-800 mb-2"><?= htmlspecialchars($product['product_name']) ?></p>
+                    <?php
+                    $final_price = $product['product_price'];
+                    if (!empty($product['product_discount']) && $product['product_discount'] > 0) {
+                        $final_price = $product['product_price'] * (1 - $product['product_discount'] / 100);
+                        echo "<p class='text-lg font-medium text-gray-400 line-through mb-2'>" . htmlspecialchars($product['product_price']) . " грн</p>";
+                        echo "<p class='text-xl font-semibold text-red-500 mb-2'>" . number_format($final_price, 2) . " грн</p>";
+                    } else {
+                        echo "<p class='text-lg font-medium text-gray-800 mb-2'>" . htmlspecialchars($product['product_price']) . " грн</p>";
+                    }
+                    ?>
+                </a>
+                <div class="flex-grow"></div>
+                <button class="add-to-cart-btn bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700" data-name="<?= htmlspecialchars($product['product_name']) ?>" data-price="<?= $final_price ?>" data-image="<?= htmlspecialchars($product['main_image']) ?>">Купити</button>
             </div>
-        </a>
+        </div>
+
     <?php endforeach; ?>
+</div>
+
+<div class="mt-5">
+    <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?= $page - 1 ?>" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                <span class="sr-only">Previous</span>
+                <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        <?php else: ?>
+            <span class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset">
+                <span class="sr-only">Previous</span>
+                <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                </svg>
+            </span>
+        <?php endif; ?>
+
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?page=<?= $i ?>" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold <?= $i == $page ? 'bg-indigo-600 text-white' : 'text-gray-900' ?> ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                <?= $i ?>
+            </a>
+        <?php endfor; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a href="?page=<?= $page + 1 ?>" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset  focus:z-20 focus:outline-offset-0">
+                <span class="sr-only">Next</span>
+                <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        <?php else: ?>
+            <span class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset">
+                <span class="sr-only">Next</span>
+                <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                </svg>
+            </span>
+        <?php endif; ?>
+    </nav>
+</div>
+
+<div id="cart-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-1/3 max-w-xl">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Кошик</h2>
+        <div id="cart-items" class="space-y-4"></div>
+        <div class="flex justify-between mt-6 gap-4">
+            <button onclick="closeCart()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">Продовжити покупки</button>
+            <a href="/profile" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Оформити замовлення</a>
+        </div>
+    </div>
 </div>
 
 <?php

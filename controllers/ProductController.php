@@ -24,9 +24,43 @@ class ProductController
             include '../views/404.php';
             exit;
         }
+        $comments = $productModel->getProductComments($params['id']);
         $additionalScripts = '/scripts/product/product.js';
+        $additionalScripts1 = '/scripts/cart/cart.js';
         require '../views/products/productPage.php';
     }
+
+
+    public function addComment()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $productId = $_POST['product_id'];
+            $rating = $_POST['rating'];
+            $comment = $_POST['comment'];
+            $userId = $_SESSION['user_id'];
+
+            $productModel = new Product();
+            $isAdded = $productModel->addComment($productId, $userId, $rating, $comment);
+
+            if ($isAdded) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Коментар успішно додано!',
+                    'comment' => [
+                        'user' => 'Ви',
+                        'rating' => $rating,
+                        'text' => $comment,
+                    ]
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Не вдалося додати коментар!'
+                ]);
+            }
+        }
+    }
+
 
 
     public function showProductForm()

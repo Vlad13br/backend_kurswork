@@ -29,7 +29,7 @@ function previewImages(event) {
 
     Array.from(files).forEach((file, index) => {
         let reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             let img = document.createElement('img');
             img.src = e.target.result;
             img.classList.add('w-24', 'h-24', 'object-cover', 'cursor-pointer', 'border', 'border-gray-300', 'rounded');

@@ -11,9 +11,11 @@ class Product
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function getAllProducts()
+    public function getAllProducts($page = 1, $limit = 12)
     {
-        $stmt = $this->db->query("
+        $offset = ($page - 1) * $limit;
+
+        $stmt = $this->db->prepare("
         SELECT 
             p.id AS product_id, 
             p.name AS product_name, 
@@ -28,11 +30,21 @@ class Product
         FROM products p
         JOIN categories c ON p.category_id = c.id
         JOIN brands b ON p.brand_id = b.id
-        ORDER BY p.id;
+        ORDER BY p.id
+        LIMIT :limit OFFSET :offset
     ");
+
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getTotalProductCount() {
+        $stmt = $this->db->query("SELECT COUNT(*) FROM products");
+        return $stmt->fetchColumn();
+    }
+
 
     public function getProductById($product_id)
     {
@@ -74,6 +86,35 @@ class Product
         }
 
         return $product;
+    }
+
+    public function getProductComments($productId)
+    {
+        $stmt = $this->db->prepare("
+        SELECT r.id, r.rating, r.comment, r.created_at, u.first_name, u.last_name
+        FROM reviews r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.product_id = :product_id
+        ORDER BY r.created_at DESC
+    ");
+        $stmt->execute(['product_id' => $productId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function addComment($productId, $userId, $rating, $comment)
+    {
+        $stmt = $this->db->prepare("
+        INSERT INTO reviews (product_id, user_id, rating, comment, created_at)
+        VALUES (:product_id, :user_id, :rating, :comment, NOW())
+    ");
+        $stmt->execute([
+            ':product_id' => $productId,
+            ':user_id' => $userId,
+            ':rating' => $rating,
+            ':comment' => $comment
+        ]);
+
+        return true;
     }
 
     public function getProductToUpdateById($product_id)

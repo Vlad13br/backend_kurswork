@@ -52,9 +52,9 @@ ob_start();
                 <p class="text-lg font-medium text-gray-800 mb-2"><?= htmlspecialchars($product['product_price']) ?>
                     грн</p>
             <?php endif; ?>
-
             <p class="text-lg text-gray-700 mt-4">
                 <strong>Наявність:</strong> <?= $product['stock'] > 0 ? 'Є в наявності' : 'Немає в наявності' ?></p>
+            <button class="add-to-cart-btn bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700" data-name="<?= htmlspecialchars($product['name']) ?>" data-price="<?= number_format($product['product_price'] * (1 - $product['discount'] / 100), 2) ?>" data-image="<?= htmlspecialchars($product['images'][0]) ?>">Купити</button>
         </div>
     </div>
 
@@ -71,7 +71,65 @@ ob_start();
             </ul>
         </div>
     <?php endif; ?>
+    <?php if (isset($_SESSION['user_id'])): ?>
+        <div class="mt-6">
+            <h2 class="text-2xl font-semibold text-gray-900">Залиште коментар</h2>
+            <form id="commentForm" class="space-y-4" action="/add-comment" method="POST">
+                <input type="hidden" name="product_id" value="<?= $product['id'] ?>" id="productId">
+                <div>
+                    <label for="rating" class="block text-gray-700">Рейтинг:</label>
+                    <select name="rating" id="rating" class="mt-2 px-4 py-2 border rounded-lg w-full" required>
+                        <option value="1">1 - Дуже погано</option>
+                        <option value="2">2 - Погано</option>
+                        <option value="3">3 - Середньо</option>
+                        <option value="4">4 - Добре</option>
+                        <option value="5">5 - Чудово</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="comment" class="block text-gray-700">Коментар:</label>
+                    <textarea name="comment" id="comment" rows="4" class="mt-2 px-4 py-2 border rounded-lg w-full" required></textarea>
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    Залишити коментар
+                </button>
+            </form>
+
+        </div>
+
+    <?php else: ?>
+        <p class="text-gray-500 mt-4">Вам потрібно увійти, щоб залишити коментар.</p>
+    <?php endif; ?>
+
+    <div class="mt-6">
+        <h2 class="text-2xl font-semibold text-gray-900">Коментарі</h2>
+        <?php if (!empty($comments)): ?>
+            <ul class="mt-4 space-y-4" id="commentList">
+                <?php foreach ($comments as $comment): ?>
+                    <li class="border-b border-gray-200 pb-4">
+                        <p class="font-semibold"><?= htmlspecialchars($comment['first_name']) ?> </p>
+                        <p class="text-yellow-500">Рейтинг: <?= $comment['rating'] ?>/5</p>
+                        <p class="text-gray-700"><?= nl2br(htmlspecialchars($comment['comment'])) ?></p>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p class="text-gray-500">Немає коментарів до цього товару.</p>
+        <?php endif; ?>
+    </div>
 </div>
+
+<div id="cart-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-1/3 max-w-xl">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Кошик</h2>
+        <div id="cart-items" class="space-y-4"></div>
+        <div class="flex justify-between mt-6 gap-4">
+            <button onclick="closeCart()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">Продовжити покупки</button>
+            <a href="/profile" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Оформити замовлення</a>
+        </div>
+    </div>
+</div>
+
 
 <?php
 $content = ob_get_clean();

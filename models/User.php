@@ -44,4 +44,32 @@ class User
         return false;
     }
 
+    public function getUserById($userId)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :user_id");
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetch();
+    }
+
+    public function updateUser($userId, $firstName, $lastName, $email)
+    {
+        $stmt = $this->db->prepare("UPDATE users SET first_name = :first_name, last_name = :last_name, email = :email WHERE id = :user_id");
+        return $stmt->execute([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'user_id' => $userId
+        ]);
+    }
+
+    public function changePassword($userId, $newPassword)
+    {
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $this->db->prepare("UPDATE users SET password = :password WHERE id = :user_id");
+        return $stmt->execute([
+            'password' => $hashedPassword,
+            'user_id' => $userId
+        ]);
+    }
+
 }
