@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = this.dataset.name;
             const price = parseFloat(this.dataset.price);
             const image = this.dataset.image;
+            const productId = this.dataset.productId;
 
-            addToCart(name, price, image);
+            addToCart(name, price, image, productId);
         });
     });
 
@@ -16,13 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function addToCart(name, price, image) {
+function addToCart(name, price, image, productId) {
     fetch('/add-to-cart', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({name, price, image})
+        body: JSON.stringify({name, price, image, product_id: productId})
     })
         .then(response => response.json())
         .then(data => {

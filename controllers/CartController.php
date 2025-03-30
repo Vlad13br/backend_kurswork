@@ -8,7 +8,12 @@ class CartController
             $_SESSION['cart'] = [];
         }
 
-        echo json_encode(['cart' => $_SESSION['cart']]);
+        $totalPrice = 0;
+        foreach ($_SESSION['cart'] as $item) {
+            $totalPrice += $item['price'] * $item['quantity'];
+        }
+
+        echo json_encode(['cart' => $_SESSION['cart'], 'totalPrice' => $totalPrice]);
     }
 
     public function addToCart()
@@ -17,6 +22,7 @@ class CartController
         $name = $data['name'];
         $price = $data['price'];
         $image = $data['image'];
+        $productId = $data['product_id'];
 
         if (!isset($_SESSION['cart'])) {
             $_SESSION['cart'] = [];
@@ -24,7 +30,7 @@ class CartController
 
         $itemFound = false;
         foreach ($_SESSION['cart'] as &$item) {
-            if ($item['name'] === $name) {
+            if ($item['product_id'] === $productId) {
                 $item['quantity']++;
                 $itemFound = true;
                 break;
@@ -36,12 +42,14 @@ class CartController
                 'name' => $name,
                 'price' => $price,
                 'image' => $image,
-                'quantity' => 1
+                'quantity' => 1,
+                'product_id' => $productId
             ];
         }
 
         echo json_encode(['status' => 'success']);
     }
+
 
     public function updateCart()
     {
@@ -51,7 +59,7 @@ class CartController
         }
 
         $productId = $_POST['product_id'];
-        $quantity = (int) $_POST['quantity'];
+        $quantity = (int)$_POST['quantity'];
 
         if ($quantity <= 0) {
             unset($_SESSION['cart'][$productId]);
@@ -80,4 +88,54 @@ class CartController
         echo json_encode(['message' => 'Товар видалено', 'cart' => $_SESSION['cart']]);
         exit;
     }
+
+    public function placeOrder()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['message' => 'Не авторизовано']);
+            exit;
+        }
+
+        if (empty($_SESSION['cart'])) {
+            echo json_encode(['message' => 'Кошик порожній']);
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $totalPrice = 0;
+        $cartItems = $_SESSION['cart'];
+
+        $inputData = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($inputData['products']) || empty($inputData['products'])) {
+            echo json_encode(['message' => 'Не вказано продукти']);
+            exit;
+        }
+
+        $productIds = array_map(fn($p) => (int)$p['product_id'], $inputData['products']);
+
+        foreach ($cartItems as $item) {
+            if (in_array((int)$item['product_id'], $productIds)) {
+                $totalPrice += $item['price'] * $item['quantity'];
+            }
+        }
+
+        $address = $inputData['address'];
+        $city = $inputData['city'];
+        $postalCode = $inputData['postal_code'];
+
+        $orderModel = new Order();
+        $orderId = $orderModel->createOrder($userId, $totalPrice, $address, $city, $postalCode);
+
+        foreach ($cartItems as $item) {
+            if (in_array((int)$item['product_id'], $productIds)) {
+                $orderModel->addOrderItem($orderId, (int)$item['product_id'], $item['quantity']);
+            }
+        }
+
+        $_SESSION['cart'] = [];
+
+        echo json_encode(['message' => 'Замовлення оформлено успішно', 'order_id' => $orderId]);
+    }
+
 }

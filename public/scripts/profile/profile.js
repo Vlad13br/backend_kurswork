@@ -52,10 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.quantity-input').forEach(function(input) {
-        input.addEventListener('change', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.quantity-input').forEach(function (input) {
+        input.addEventListener('change', function () {
             const productId = this.dataset.key;
             const quantity = this.value;
 
@@ -76,8 +75,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.querySelectorAll('.remove-btn').forEach(function(button) {
-        button.addEventListener('click', function() {
+    document.querySelectorAll('.remove-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
             const productId = this.dataset.key;
 
             fetch('/remove-from-cart', {
@@ -103,8 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateCartTable(cart) {
     const cartTableBody = document.querySelector('#cartTable tbody');
     cartTableBody.innerHTML = '';
-
-    cart.forEach(function(item, index) {
+    cart.forEach(function (item, index) {
         const row = document.createElement('tr');
         row.id = 'cartItem-' + index;
         row.classList.add('hover:bg-gray-100');
@@ -123,8 +121,8 @@ function updateCartTable(cart) {
         cartTableBody.appendChild(row);
     });
 
-    document.querySelectorAll('.quantity-input').forEach(function(input) {
-        input.addEventListener('change', function() {
+    document.querySelectorAll('.quantity-input').forEach(function (input) {
+        input.addEventListener('change', function () {
             const productId = this.dataset.key;
             const quantity = this.value;
 
@@ -145,8 +143,8 @@ function updateCartTable(cart) {
         });
     });
 
-    document.querySelectorAll('.remove-btn').forEach(function(button) {
-        button.addEventListener('click', function() {
+    document.querySelectorAll('.remove-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
             const productId = this.dataset.key;
 
             fetch('/remove-from-cart', {
@@ -166,3 +164,56 @@ function updateCartTable(cart) {
         });
     });
 }
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('orderForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const address = document.getElementById('address').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const postalCode = document.getElementById('postal_code').value.trim();
+
+        if (!address || !city || !postalCode) {
+            alert('Будь ласка, заповніть усі поля.');
+            return;
+        }
+
+        const products = [];
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            const productId = input.getAttribute('data-key');
+            const quantity = parseInt(input.value, 10);
+            console.log(`ID: ${productId}, Кількість: ${quantity}`);
+            if (quantity > 0 && productId) {
+                products.push({ product_id: productId, quantity });
+            }
+        });
+
+        console.log('Фінальний запит:', { address, city, postal_code: postalCode, products });
+
+        if (products.length === 0) {
+            alert('Додайте товари до кошика перед оформленням замовлення.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/place-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address, city, postal_code: postalCode, products })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Помилка оформлення замовлення');
+
+            alert(data.message);
+
+            document.getElementById('orderForm').style.display = 'none';
+            document.getElementById('cart').style.display = 'none';
+
+            document.getElementById('orderForm').reset();
+
+        } catch (error) {
+            console.error('Помилка:', error);
+            alert(error.message);
+        }
+    });
+});

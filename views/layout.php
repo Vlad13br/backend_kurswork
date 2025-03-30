@@ -19,6 +19,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <a href="/" class="text-2xl ">Головна</a>
         <div class="flex space-x-4">
             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <a href="/admin" class="hover:text-blue-200">Адмінка</a>
                 <a href="/add-category" class="hover:text-blue-200">Додати категорію</a>
                 <a href='/add-brand' class="hover:text-blue-200">Додати бренд</a>
                 <a href="/add-product" class="hover:text-blue-200">Додати товар</a>

@@ -28,7 +28,11 @@ ob_start();
                     ?>
                 </a>
                 <div class="flex-grow"></div>
-                <button class="add-to-cart-btn bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700" data-name="<?= htmlspecialchars($product['product_name']) ?>" data-price="<?= $final_price ?>" data-image="<?= htmlspecialchars($product['main_image']) ?>">Купити</button>
+                <button class="add-to-cart-btn bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700"
+                        data-name="<?= htmlspecialchars($product['product_name']) ?>"
+                        data-price="<?= $final_price ?>"
+                        data-image="<?= htmlspecialchars($product['main_image']) ?>"
+                        data-product-id="<?= $product['product_id'] ?>">Купити</button>
             </div>
         </div>
 
@@ -78,12 +82,16 @@ ob_start();
 </div>
 
 <div id="cart-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white p-8 rounded-lg shadow-xl w-1/3 max-w-xl">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-2/3 max-w-xl">
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">Кошик</h2>
         <div id="cart-items" class="space-y-4"></div>
         <div class="flex justify-between mt-6 gap-4">
             <button onclick="closeCart()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">Продовжити покупки</button>
-            <a href="/profile" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Оформити замовлення</a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="/profile" class=" bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Оформити замовлення</a>
+            <?php else: ?>
+                <a href="/profile" class=" bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Увійти для оформлення замовлення</a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

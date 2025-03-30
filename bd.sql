@@ -57,10 +57,9 @@ CREATE TABLE orders (
                         user_id INT NOT NULL,
                         total_price DECIMAL(10,2) NOT NULL,
                         status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
-                        address VARCHAR(255) NOT NULL,
-                        city VARCHAR(100) NOT NULL,
-                        postal_code VARCHAR(20) NOT NULL,
-                        tracking_number VARCHAR(50) DEFAULT NULL,
+                        address VARCHAR(255) ,
+                        city VARCHAR(100) ,
+                        postal_code VARCHAR(20) ,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
                         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

@@ -7,6 +7,7 @@ require_once '../controllers/ProductController.php';
 require_once '../controllers/BrandController.php';
 require_once '../controllers/ProfileController.php';
 require_once  '../controllers/CartController.php';
+require_once  '../controllers/AdminController.php';
 
 class Router
 {
@@ -39,6 +40,11 @@ class Router
         $this->router->map('POST', '/add-to-cart', 'CartController#addToCart');
         $this->router->map('POST', '/update-cart', 'CartController#updateCart');
         $this->router->map('POST', '/remove-from-cart', 'CartController#removeFromCart');
+        $this->router->map('POST', '/place-order', 'CartController#placeOrder');
+
+        $this->router->map('GET', '/admin', 'AdminController#showProfile');
+        $this->router->map('POST', '/admin/updateOrderStatus', 'AdminController#updateOrderStatus');
+        $this->router->map('POST', '/admin/deleteOrder', 'AdminController#deleteOrder');
 
         $this->router->map('GET', '/add-category', 'CategoryController#showCategoryForm');
         $this->router->map('POST', '/add-category/store', 'CategoryController#createCategory');
