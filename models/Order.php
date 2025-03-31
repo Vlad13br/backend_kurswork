@@ -77,24 +77,70 @@ class Order
     public function getAllOrders()
     {
         $stmt = $this->db->prepare(
-            "SELECT o.id AS order_id, o.user_id, o.total_price, o.status, o.address, o.city, o.postal_code, o.tracking_number, o.created_at,
-                oi.product_id, oi.quantity, oi.price, p.name AS product_name, p.description AS product_description, p.price AS product_price
+            "SELECT o.id AS order_id,o.user_id, o.total_price, o.status, o.address, o.city, o.postal_code, o.tracking_number, o.created_at,
+                oi.product_id, oi.quantity, oi.price, p.name AS product_name, p.description AS product_description, p.price AS product_price,
+                u.first_name AS user_first_name, u.last_name AS user_last_name, u.email AS user_email, p.stock As product_stock 
          FROM orders o
          JOIN order_items oi ON o.id = oi.order_id
          JOIN products p ON oi.product_id = p.id
+         JOIN users u ON o.user_id = u.id
          WHERE o.status NOT IN ('delivered', 'cancelled')"
         );
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+
     public function updateOrderStatus($orderId, $status)
     {
-        $stmt = $this->db->prepare("UPDATE orders SET status = :status WHERE id = :id");
-        $stmt->bindParam(':status', $status);
-        $stmt->bindParam(':id', $orderId);
-        $stmt->execute();
+        $this->db->beginTransaction();
+
+        try {
+            $stmt = $this->db->prepare("UPDATE orders SET status = :status WHERE id = :id");
+            $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':id', $orderId);
+            $stmt->execute();
+
+            if ($status === 'delivered') {
+                $stmt = $this->db->prepare("
+                SELECT product_id, quantity FROM order_items WHERE order_id = :orderId
+            ");
+                $stmt->bindParam(':orderId', $orderId);
+                $stmt->execute();
+                $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($items as $item) {
+                    $stmt = $this->db->prepare("
+                    SELECT stock FROM products WHERE id = :productId
+                ");
+                    $stmt->bindParam(':productId', $item['product_id']);
+                    $stmt->execute();
+                    $stock = $stmt->fetchColumn();
+
+                    if ($stock === false) {
+                        throw new Exception("Товар з ID {$item['product_id']} не знайдено.");
+                    }
+
+                    if ($stock < $item['quantity']) {
+                        throw new Exception("Недостатньо товару (ID {$item['product_id']}) на складі.");
+                    }
+
+                    $stmt = $this->db->prepare("
+                    UPDATE products SET stock = stock - :quantity WHERE id = :productId
+                ");
+                    $stmt->bindParam(':quantity', $item['quantity']);
+                    $stmt->bindParam(':productId', $item['product_id']);
+                    $stmt->execute();
+                }
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
     }
+
 
     public function deleteOrder($orderId)
     {
@@ -104,4 +150,5 @@ class Order
     }
 
 }
+
 ?>

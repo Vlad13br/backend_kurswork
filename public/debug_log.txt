@@ -1,0 +1,7 @@
+Array
+(
+    [name] => Iphone 15
+    [price] => 12345
+    [image] => https://res.cloudinary.com/deugymr0b/image/upload/v1743081953/mhi6cjjlxahmfssrjrgm.jpg
+    [product_id] => 34
+)

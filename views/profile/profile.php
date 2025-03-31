@@ -2,6 +2,7 @@
 $title = 'Профіль користувача';
 ob_start();
 
+$totalPrice = 0;
 ?>
 
 <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg border border-gray-200">
@@ -26,11 +27,12 @@ ob_start();
                     </tr>
                 <?php else: ?>
                     <?php foreach ($cartItems as $key => $item): ?>
+                    <?php $totalPrice += $item['quantity'] * $item['price'] ?>
                         <tr id="cartItem-<?= $key ?>" class="hover:bg-gray-100">
                             <td class="px-4 py-2"><?= htmlspecialchars($item['name']) ?></td>
                             <td class="px-4 py-2">
                                 <input type="number" min="1" value="<?= $item['quantity'] ?>"
-                                       class="quantity-input w-16 py-2 px-4 border rounded-lg" data-key="<?= $item['product_id'] ?>"/>
+                                       class="quantity-input w-20 py-2 px-4 border rounded-lg" data-key="<?= $item['product_id'] ?>"/>
                             </td>
                             <td class="px-4 py-2"><?= htmlspecialchars($item['price']) ?> грн</td>
                             <td class="px-4 py-2">
@@ -45,6 +47,7 @@ ob_start();
                 <?php endif; ?>
                 </tbody>
             </table>
+            <p id="totalPrice" class="text-right text-lg font-semibold ">Загальна сума: <?= $totalPrice ?> грн</p>
 
                 <div class="mt-4">
                     <h2 class="text-2xl font-semibold text-gray-900">Оформити замовлення</h2>

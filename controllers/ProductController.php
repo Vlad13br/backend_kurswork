@@ -10,13 +10,6 @@ use Cloudinary\Configuration\Configuration;
 
 class ProductController
 {
-    public function index()
-    {
-        $productModel = new Product();
-        $products = $productModel->getAllProducts();
-        require '../views/home.php';
-    }
-
     public function getProduct($params){
         $productModel = new Product();
         $product = $productModel->getProductById($params['id']);

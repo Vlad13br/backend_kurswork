@@ -11,9 +11,32 @@ class Product
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function getAllProducts($page = 1, $limit = 12)
+    public function getAllProducts($page = 1, $limit = 12, $sort = 'newest', $minPrice = null, $maxPrice = null, $category = null)
     {
         $offset = ($page - 1) * $limit;
+
+        $orderBy = "p.created_at DESC";
+
+        if ($sort === 'price_asc') {
+            $orderBy = "p.price ASC";
+        } elseif ($sort === 'price_desc') {
+            $orderBy = "p.price DESC";
+        } elseif ($sort === 'popular') {
+            $orderBy = "p.sold DESC";
+        }
+
+        $whereClauses = [];
+        if ($minPrice) {
+            $whereClauses[] = "(p.price * (1 - p.discount)) >= :min_price";
+        }
+        if ($maxPrice) {
+            $whereClauses[] = "(p.price * (1 - p.discount)) <= :max_price";
+        }
+        if ($category) {
+            $whereClauses[] = "p.category_id = :category";
+        }
+
+        $whereSql = $whereClauses ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
 
         $stmt = $this->db->prepare("
         SELECT 
@@ -30,9 +53,14 @@ class Product
         FROM products p
         JOIN categories c ON p.category_id = c.id
         JOIN brands b ON p.brand_id = b.id
-        ORDER BY p.id
+        $whereSql
+        ORDER BY p.stock = 0, $orderBy
         LIMIT :limit OFFSET :offset
     ");
+
+        if ($minPrice) $stmt->bindParam(':min_price', $minPrice, PDO::PARAM_INT);
+        if ($maxPrice) $stmt->bindParam(':max_price', $maxPrice, PDO::PARAM_INT);
+        if ($category) $stmt->bindParam(':category', $category, PDO::PARAM_INT);
 
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -40,11 +68,32 @@ class Product
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function getTotalProductCount() {
-        $stmt = $this->db->query("SELECT COUNT(*) FROM products");
+
+    public function getTotalProductCount($minPrice = null, $maxPrice = null, $category = null) {
+        $query = "SELECT COUNT(*) FROM products p";
+
+        $params = [];
+
+        if ($minPrice !== null) {
+            $query .= " WHERE p.price >= :min_price";
+            $params[':min_price'] = $minPrice;
+        }
+
+        if ($maxPrice !== null) {
+            $query .= $minPrice !== null ? " AND p.price <= :max_price" : " WHERE p.price <= :max_price";
+            $params[':max_price'] = $maxPrice;
+        }
+
+        if ($category !== null) {
+            $query .= ($minPrice !== null || $maxPrice !== null) ? " AND p.category_id = :category" : " WHERE p.category_id = :category";
+            $params[':category'] = $category;
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
+
         return $stmt->fetchColumn();
     }
-
 
     public function getProductById($product_id)
     {

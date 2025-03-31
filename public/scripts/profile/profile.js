@@ -101,7 +101,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function updateCartTable(cart) {
     const cartTableBody = document.querySelector('#cartTable tbody');
+    const totalPriceElement = document.querySelector('#totalPrice');
+
     cartTableBody.innerHTML = '';
+    let totalPrice = 0;
+
     cart.forEach(function (item, index) {
         const row = document.createElement('tr');
         row.id = 'cartItem-' + index;
@@ -110,7 +114,7 @@ function updateCartTable(cart) {
         row.innerHTML = `
             <td class="px-4 py-2">${item.name}</td>
             <td class="px-4 py-2">
-                <input type="number" min="1" value="${item.quantity}" class="quantity-input w-16 py-2 px-4 border rounded-lg" data-key="${index}" />
+                <input type="number" min="1" value="${item.quantity}" class="quantity-input w-20 py-2 px-4 border rounded-lg" data-key="${index}" />
             </td>
             <td class="px-4 py-2">${item.price} грн</td>
             <td class="px-4 py-2">
@@ -119,7 +123,11 @@ function updateCartTable(cart) {
         `;
 
         cartTableBody.appendChild(row);
+
+        totalPrice += item.price * item.quantity;
     });
+
+    totalPriceElement.textContent = `Загальна сума: ${totalPrice} грн`;
 
     document.querySelectorAll('.quantity-input').forEach(function (input) {
         input.addEventListener('change', function () {
@@ -164,6 +172,7 @@ function updateCartTable(cart) {
         });
     });
 }
+
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('orderForm').addEventListener('submit', async function (e) {
         e.preventDefault();

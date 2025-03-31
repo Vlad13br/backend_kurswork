@@ -64,10 +64,10 @@ class CartController
         if ($quantity <= 0) {
             unset($_SESSION['cart'][$productId]);
         } else {
-            $_SESSION['cart'][$productId]['quantity'] = $quantity;
+            if (isset($_SESSION['cart'][$productId])) {
+                $_SESSION['cart'][$productId]['quantity'] = $quantity;
+            }
         }
-
-        $_SESSION['cart'] = array_values($_SESSION['cart']);
 
         echo json_encode(['message' => 'Кошик оновлено', 'cart' => $_SESSION['cart']]);
         exit;

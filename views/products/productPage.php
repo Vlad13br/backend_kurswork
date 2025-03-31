@@ -110,26 +110,29 @@ ob_start();
 
     <div class="mt-6">
         <h2 class="text-2xl font-semibold text-gray-900">Коментарі</h2>
-        <?php if (!empty($comments)): ?>
-            <ul class="mt-4 space-y-4" id="commentList">
+        <ul class="mt-4 space-y-4" id="commentList">
+            <?php if (!empty($comments)): ?>
                 <?php foreach ($comments as $comment): ?>
                     <li class="border-b border-gray-200 pb-4">
-                        <p class="font-semibold"><?= htmlspecialchars($comment['first_name']) ?> </p>
+                        <p class="font-semibold"><?= htmlspecialchars($comment['first_name']) ?></p>
                         <p class="text-yellow-500">Рейтинг: <?= $comment['rating'] ?>/5</p>
                         <p class="text-gray-700"><?= nl2br(htmlspecialchars($comment['comment'])) ?></p>
                     </li>
                 <?php endforeach; ?>
-            </ul>
-        <?php else: ?>
-            <p class="text-gray-500">Немає коментарів до цього товару.</p>
+            <?php endif; ?>
+        </ul>
+        <?php if (empty($comments)): ?>
+            <p class="text-gray-500" id="noCommentsMessage">Немає коментарів до цього товару.</p>
         <?php endif; ?>
     </div>
+
 </div>
 
 <div id="cart-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white p-8 rounded-lg shadow-xl w-2/3 max-w-xl">
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">Кошик</h2>
         <div id="cart-items" class="space-y-4"></div>
+        <p id="price">Total price</p>
         <div class="flex justify-between mt-6 gap-4">
             <button onclick="closeCart()"
                     class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
