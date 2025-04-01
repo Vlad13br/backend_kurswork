@@ -50,6 +50,7 @@ class Router
         $this->router->map('GET', '/admin', 'AdminController#showProfile', 'admin_dashboard');
         $this->router->map('POST', '/admin/updateOrderStatus', 'AdminController#updateOrderStatus', 'admin_update_order');
         $this->router->map('POST', '/admin/deleteOrder', 'AdminController#deleteOrder', 'admin_delete_order');
+        $this->router->map('POST', '/delete-comment', 'ProductController#deleteComment', 'admin_delete_comment');
         $this->router->map('GET', '/add-category', 'CategoryController#showCategoryForm', 'admin_add_category');
         $this->router->map('POST', '/add-category/store', 'CategoryController#createCategory', 'admin_store_category');
         $this->router->map('GET', '/add-brand', 'BrandController#showBrandForm', 'admin_add_brand');

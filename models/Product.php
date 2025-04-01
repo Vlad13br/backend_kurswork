@@ -180,7 +180,6 @@ class Product
         return $product;
     }
 
-
     public function createProduct($name, $description, $price, $stock, $categoryId, $brandId, $discount, $attributes)
     {
         $stmt = $this->db->prepare("

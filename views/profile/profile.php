@@ -139,6 +139,7 @@ $totalPrice = 0;
                         <ul class="list-disc pl-5">
                             <?php foreach ($order['items'] as $item): ?>
                                 <li><?= htmlspecialchars($item['product_name']) ?> - <?= htmlspecialchars($item['item_price']) ?> грн (Кількість: <?= htmlspecialchars($item['quantity']) ?>)</li>
+
                             <?php endforeach; ?>
                         </ul>
                     </div>

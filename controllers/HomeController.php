@@ -7,7 +7,7 @@ class HomeController {
     public function index() {
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $sort = $_GET['sort'] ?? 'newest';
-        $limit = 12;
+        $limit = 6;
         $minPrice = $_GET['min_price'] ?? null;
         $maxPrice = $_GET['max_price'] ?? null;
         $category = $_GET['category'] ?? null;

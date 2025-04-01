@@ -58,7 +58,7 @@ class CartController
             exit;
         }
 
-        $productId = $_POST['product_id'];
+        $productId = (int)$_POST['product_id'];
         $quantity = (int)$_POST['quantity'];
 
         if ($quantity <= 0) {

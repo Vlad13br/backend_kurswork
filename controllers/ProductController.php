@@ -3,14 +3,20 @@
 require_once '../vendor/autoload.php';
 require_once '../models/Product.php';
 require_once '../models/Category.php';
-require_once  '../models/Brand.php';
+require_once '../models/Brand.php';
 
 use Cloudinary\Api\Upload\UploadApi;
 use Cloudinary\Configuration\Configuration;
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+Configuration::instance($_ENV['CLOUDINARY_URL']);
 
 class ProductController
 {
-    public function getProduct($params){
+    public function getProduct($params)
+    {
         $productModel = new Product();
         $product = $productModel->getProductById($params['id']);
         if (!$product) {
@@ -23,7 +29,6 @@ class ProductController
         require '../views/products/productPage.php';
     }
 
-
     public function addComment()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -31,6 +36,14 @@ class ProductController
             $rating = $_POST['rating'];
             $comment = $_POST['comment'];
             $userId = $_SESSION['user_id'];
+
+            if (!isset($productId, $rating, $comment, $userId)) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Відсутні необхідні дані!'
+                ]);
+                return;
+            }
 
             $productModel = new Product();
             $isAdded = $productModel->addComment($productId, $userId, $rating, $comment);
@@ -51,10 +64,35 @@ class ProductController
                     'message' => 'Не вдалося додати коментар!'
                 ]);
             }
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Невірний метод запиту!'
+            ]);
         }
     }
 
 
+    public function deleteComment()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_POST['comment_id']) || !isset($_SESSION['user_id'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Невірний запит!']);
+                return;
+            }
+
+            $commentId = $_POST['comment_id'];
+
+            $productModel = new Product();
+            $isDeleted = $productModel->deleteComment($commentId);
+
+            if ($isDeleted) {
+                echo json_encode(['status' => 'success', 'message' => 'Коментар видалено!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Помилка при видаленні!']);
+            }
+        }
+    }
 
     public function showProductForm()
     {
@@ -94,9 +132,7 @@ class ProductController
 
         if ($productId) {
             $mainImageIndex = $_POST['main_image'] ?? 0;
-// винеси кудись підключення
             if (!empty($images['name'][0])) {
-                Configuration::instance('CLOUDINARY_URL=cloudinary://918711713775825:ulriMmQH4x1IqPbO7xE_u8EgEcc@deugymr0b');
                 $upload = new UploadApi();
 
                 foreach ($images['tmp_name'] as $key => $tmpName) {
@@ -130,6 +166,7 @@ class ProductController
             echo json_encode([]);
         }
     }
+
     public function editProduct($params)
     {
         $productModel = new Product();
@@ -157,7 +194,7 @@ class ProductController
         }
 
         $productModel = new Product();
-        $updated = $productModel->updateProduct($productId, $name, $description, $price, $stock,  $discount);
+        $updated = $productModel->updateProduct($productId, $name, $description, $price, $stock, $discount);
 
         if ($updated) {
             header('Location: /product/' . $productId);

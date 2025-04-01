@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.add-to-cart-btn').forEach(function(button) {
         button.addEventListener('click', function() {
             const name = this.dataset.name;
-            const price = parseFloat(this.dataset.price);
+            const price = parseFloat(this.dataset.price.replace(',', '.'));
             const image = this.dataset.image;
             const productId = this.dataset.productId;
 

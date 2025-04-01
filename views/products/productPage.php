@@ -56,7 +56,7 @@ ob_start();
                 <strong>Наявність:</strong> <?= $product['stock'] > 0 ? 'Є в наявності' : 'Немає в наявності' ?></p>
             <button class="add-to-cart-btn bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700"
                     data-name="<?= htmlspecialchars($product['name']) ?>"
-                    data-price="<?= number_format($product['product_price'] * (1 - $product['discount'] / 100), 2) ?>"
+                    data-price="<?= number_format($product['product_price'] * (1 - $product['discount'] / 100), 2, '.', '') ?>"
                     data-image="<?= htmlspecialchars($product['images'][0]) ?>"
                     data-product-id="<?= $product['id'] ?>">Купити
             </button>
@@ -113,10 +113,21 @@ ob_start();
         <ul class="mt-4 space-y-4" id="commentList">
             <?php if (!empty($comments)): ?>
                 <?php foreach ($comments as $comment): ?>
-                    <li class="border-b border-gray-200 pb-4">
-                        <p class="font-semibold"><?= htmlspecialchars($comment['first_name']) ?></p>
-                        <p class="text-yellow-500">Рейтинг: <?= $comment['rating'] ?>/5</p>
-                        <p class="text-gray-700"><?= nl2br(htmlspecialchars($comment['comment'])) ?></p>
+                    <li class="border-b border-gray-200 pb-4 flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold"><?= htmlspecialchars($comment['first_name']) ?></p>
+                            <p class="text-yellow-500">Рейтинг: <?= $comment['rating'] ?>/5</p>
+                            <p class="text-gray-700"><?= nl2br(htmlspecialchars($comment['comment'])) ?></p>
+                        </div>
+
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                            <button
+                                    class="ml-4 text-red-500 hover:text-red-700 delete-comment"
+                                    data-comment-id="<?= $comment['id'] ?>"
+                            >
+                                Видалити
+                            </button>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             <?php endif; ?>
