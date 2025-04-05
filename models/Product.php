@@ -69,7 +69,8 @@ class Product
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getTotalProductCount($minPrice = null, $maxPrice = null, $category = null) {
+    public function getTotalProductCount($minPrice = null, $maxPrice = null, $category = null)
+    {
         $query = "SELECT COUNT(*) FROM products p";
 
         $params = [];
@@ -98,22 +99,26 @@ class Product
     public function getProductById($product_id)
     {
         $stmt = $this->db->prepare("
-    SELECT p.id, p.name, p.description, p.price AS product_price, p.stock, p.discount, 
-        b.name AS brand, 
-        GROUP_CONCAT(pi.image_url SEPARATOR ', ') AS images, 
-        GROUP_CONCAT(pa.attribute_name SEPARATOR ', ') AS attribute_name, 
-        GROUP_CONCAT(pa.attribute_value SEPARATOR ', ') AS attribute_value
-    FROM products p
-    LEFT JOIN brands b ON p.brand_id = b.id
-    LEFT JOIN product_images pi ON pi.product_id = p.id
-    LEFT JOIN product_attributes pa ON pa.product_id = p.id
-    WHERE p.id = :id
-    GROUP BY p.id
-");
+        SELECT p.id, p.name, p.description, p.price AS product_price, p.stock, p.discount, 
+            b.name AS brand, 
+            GROUP_CONCAT(pi.image_url SEPARATOR ', ') AS images, 
+            GROUP_CONCAT(pa.attribute_name SEPARATOR ', ') AS attribute_name, 
+            GROUP_CONCAT(pa.attribute_value SEPARATOR ', ') AS attribute_value
+        FROM products p
+        LEFT JOIN brands b ON p.brand_id = b.id
+        LEFT JOIN product_images pi ON pi.product_id = p.id
+        LEFT JOIN product_attributes pa ON pa.product_id = p.id
+        WHERE p.id = :id
+        GROUP BY p.id
+    ");
 
         $stmt->execute(['id' => $product_id]);
 
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$product) {
+            return false;
+        }
 
         if ($product['attribute_name'] && $product['attribute_value']) {
             $attributes = explode(', ', $product['attribute_name']);
@@ -129,13 +134,13 @@ class Product
             $product['attributes'] = [];
         }
 
-
         if ($product['images']) {
             $product['images'] = explode(', ', $product['images']);
         }
 
         return $product;
     }
+
 
     public function getProductComments($productId)
     {
@@ -164,6 +169,22 @@ class Product
         ]);
 
         return true;
+    }
+
+    public function deleteComment($commentId)
+    {
+        $stmt = $this->db->prepare("SELECT user_id FROM reviews WHERE id = :comment_id");
+        $stmt->execute([':comment_id' => $commentId]);
+        $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$comment) {
+            return ['status' => 'error', 'message' => 'Коментар не знайдений'];
+        }
+
+        $stmt = $this->db->prepare("DELETE FROM reviews WHERE id = :comment_id");
+        $stmt->execute([':comment_id' => $commentId]);
+
+        return ['status' => 'success', 'message' => 'Коментар успішно видалено'];
     }
 
     public function getProductToUpdateById($product_id)

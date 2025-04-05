@@ -14,6 +14,7 @@ class CartController
         }
 
         echo json_encode(['cart' => $_SESSION['cart'], 'totalPrice' => $totalPrice]);
+        http_response_code(200);
     }
 
     public function addToCart()
@@ -48,13 +49,14 @@ class CartController
         }
 
         echo json_encode(['status' => 'success']);
+        http_response_code(201);
     }
-
 
     public function updateCart()
     {
         if (!isset($_POST['product_id'], $_POST['quantity'])) {
             echo json_encode(['message' => 'Невірні дані']);
+            http_response_code(400);
             exit;
         }
 
@@ -70,6 +72,7 @@ class CartController
         }
 
         echo json_encode(['message' => 'Кошик оновлено', 'cart' => $_SESSION['cart']]);
+        http_response_code(200);
         exit;
     }
 
@@ -77,6 +80,7 @@ class CartController
     {
         if (!isset($_POST['product_id'])) {
             echo json_encode(['message' => 'Невірний запит']);
+            http_response_code(400);
             exit;
         }
 
@@ -86,6 +90,7 @@ class CartController
         $_SESSION['cart'] = array_values($_SESSION['cart']);
 
         echo json_encode(['message' => 'Товар видалено', 'cart' => $_SESSION['cart']]);
+        http_response_code(200);
         exit;
     }
 
@@ -93,11 +98,13 @@ class CartController
     {
         if (!isset($_SESSION['user_id'])) {
             echo json_encode(['message' => 'Не авторизовано']);
+            http_response_code(401);
             exit;
         }
 
         if (empty($_SESSION['cart'])) {
             echo json_encode(['message' => 'Кошик порожній']);
+            http_response_code(400);
             exit;
         }
 
@@ -109,6 +116,7 @@ class CartController
 
         if (!isset($inputData['products']) || empty($inputData['products'])) {
             echo json_encode(['message' => 'Не вказано продукти']);
+            http_response_code(400);
             exit;
         }
 
@@ -136,6 +144,6 @@ class CartController
         $_SESSION['cart'] = [];
 
         echo json_encode(['message' => 'Замовлення оформлено успішно', 'order_id' => $orderId]);
+        http_response_code(201);
     }
-
 }

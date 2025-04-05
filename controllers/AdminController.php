@@ -13,6 +13,7 @@ class AdminController
         $cartItems = $_SESSION['cart'] ?? [];
 
         $additionalScripts = '/scripts/admin/admin.js';
+        http_response_code(200);
         require '../views/admin/adminPage.php';
     }
 
@@ -21,6 +22,7 @@ class AdminController
     {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             echo json_encode(['message' => 'Недостатньо прав']);
+            http_response_code(403);
             exit;
         }
 
@@ -35,11 +37,13 @@ class AdminController
             if (in_array($status, $validStatuses)) {
                 $orderModel->updateOrderStatus($orderId, $status);
                 echo json_encode(['message' => 'Статус замовлення оновлено']);
+                http_response_code(201);
             } else {
                 echo json_encode(['message' => 'Невірний статус']);
             }
         } else {
             echo json_encode(['message' => 'Недостатньо даних']);
+            http_response_code(400);
         }
 
         exit;
@@ -49,6 +53,7 @@ class AdminController
     {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             echo json_encode(['message' => 'Недостатньо прав']);
+            http_response_code(403);
             exit;
         }
 
@@ -60,10 +65,11 @@ class AdminController
 
             $orderModel->deleteOrder($orderId);
             echo json_encode(['message' => 'Замовлення видалено']);
+            http_response_code(200);
         } else {
             echo json_encode(['message' => 'Недостатньо даних']);
+            http_response_code(400);
         }
-
         exit;
     }
 

@@ -18,14 +18,27 @@ class ProductController
     public function getProduct($params)
     {
         $productModel = new Product();
-        $product = $productModel->getProductById($params['id']);
-        if (!$product) {
-            include '../views/404.php';
+
+        try {
+            $product = $productModel->getProductById($params['id']);
+            $comments = $productModel->getProductComments($params['id']);
+        } catch (Exception $e) {
+            http_response_code(500);
+            require '../views/500.php';
             exit;
         }
-        $comments = $productModel->getProductComments($params['id']);
+
+        if (!$product) {
+            http_response_code(500);
+            require '../views/500.php';
+            exit;
+        }
+
         $additionalScripts = '/scripts/product/product.js';
         $additionalScripts1 = '/scripts/cart/cart.js';
+
+        http_response_code(200);
+        header('Cache-Control: public, max-age=3600');
         require '../views/products/productPage.php';
     }
 
@@ -38,6 +51,7 @@ class ProductController
             $userId = $_SESSION['user_id'];
 
             if (!isset($productId, $rating, $comment, $userId)) {
+                http_response_code(400);
                 echo json_encode([
                     'status' => 'error',
                     'message' => 'Відсутні необхідні дані!'
@@ -49,6 +63,7 @@ class ProductController
             $isAdded = $productModel->addComment($productId, $userId, $rating, $comment);
 
             if ($isAdded) {
+                http_response_code(200);
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Коментар успішно додано!',
@@ -59,12 +74,14 @@ class ProductController
                     ]
                 ]);
             } else {
+                http_response_code(400);
                 echo json_encode([
                     'status' => 'error',
                     'message' => 'Не вдалося додати коментар!'
                 ]);
             }
         } else {
+            http_response_code(405);
             echo json_encode([
                 'status' => 'error',
                 'message' => 'Невірний метод запиту!'
@@ -72,11 +89,11 @@ class ProductController
         }
     }
 
-
     public function deleteComment()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!isset($_POST['comment_id']) || !isset($_SESSION['user_id'])) {
+                http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'Невірний запит!']);
                 return;
             }
@@ -87,21 +104,34 @@ class ProductController
             $isDeleted = $productModel->deleteComment($commentId);
 
             if ($isDeleted) {
+                http_response_code(200);
                 echo json_encode(['status' => 'success', 'message' => 'Коментар видалено!']);
             } else {
+                http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'Помилка при видаленні!']);
             }
+        } else {
+            http_response_code(405);
+            echo json_encode(['status' => 'error', 'message' => 'Невірний метод запиту!']);
         }
     }
 
     public function showProductForm()
     {
         $categoryModel = new Category();
-        $categories = $categoryModel->getAllCategories();
-
         $brandModel = new Brand();
-        $brands = $brandModel->getAllBrands();
+
+        try {
+            $categories = $categoryModel->getAllCategories();
+            $brands = $brandModel->getAllBrands();
+        } catch (Exception $e) {
+            http_response_code(500);
+            require '../views/500.php';
+            exit;
+        }
+
         $additionalScripts = '/scripts/brand/brands.js';
+        http_response_code(200);
         require '../views/products/create_product.php';
     }
 
@@ -141,14 +171,18 @@ class ProductController
                     $isMain = ($key == $mainImageIndex) ? true : false;
 
                     if (!$productModel->saveProductImage($productId, $imageUrl, $isMain)) {
+                        http_response_code(400);
                         echo "Помилка при додаванні зображення.";
+                        exit;
                     }
                 }
             }
 
+            http_response_code(201);
             header('Location: /');
             exit;
         } else {
+            http_response_code(400);
             echo "Помилка при створенні продукту.";
         }
     }
@@ -161,8 +195,15 @@ class ProductController
             $categoryModel = new Category();
             $attributes = $categoryModel->getCategoryAttributes($categoryId);
 
-            echo json_encode($attributes);
+            if ($attributes) {
+                http_response_code(200);
+                echo json_encode($attributes);
+            } else {
+                http_response_code(404);
+                echo json_encode([]);
+            }
         } else {
+            http_response_code(400);
             echo json_encode([]);
         }
     }
@@ -170,13 +211,21 @@ class ProductController
     public function editProduct($params)
     {
         $productModel = new Product();
-        $product = $productModel->getProductToUpdateById($params['id']);
+        try {
+            $product = $productModel->getProductToUpdateById($params['id']);
+        } catch (Exception $e) {
+            http_response_code(500);
+            require '../views/500.php';
+            exit;
+        }
 
         if (!$product) {
+            http_response_code(404);
             include '../views/404.php';
             exit;
         }
 
+        http_response_code(200);
         require '../views/products/edit_product.php';
     }
 
@@ -190,6 +239,7 @@ class ProductController
         $discount = $_POST['discount'] ?? 0;
 
         if (empty($name) || empty($description) || empty($price) || empty($stock)) {
+            http_response_code(400);
             return;
         }
 
@@ -197,12 +247,12 @@ class ProductController
         $updated = $productModel->updateProduct($productId, $name, $description, $price, $stock, $discount);
 
         if ($updated) {
+            http_response_code(200);
             header('Location: /product/' . $productId);
             exit;
         } else {
+            http_response_code(400);
             echo "Error updating product.";
         }
     }
-
-
 }

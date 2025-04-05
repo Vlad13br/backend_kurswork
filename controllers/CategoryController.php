@@ -8,9 +8,17 @@ class CategoryController
     {
         $categoryModel = new Category();
         $categories = $categoryModel->getAllCategoriesAndAtributes();
+
+        if ($categories === false) {
+            http_response_code(500);
+            require '../views/500.php';
+            exit;
+        }
+
         $additionalScripts = '/scripts/category/category.js';
         require '../views/category/add-category.php';
     }
+
     public function createCategory()
     {
         if (isset($_POST['category_name'])) {
@@ -21,12 +29,21 @@ class CategoryController
 
             $categoryId = $category->createCategory($categoryName);
 
-            $category->addAttributes($categoryId, $attributeNames);
+            if ($categoryId) {
+                $category->addAttributes($categoryId, $attributeNames);
 
-            header("Location: /");
-            exit;
+                http_response_code(201);
+                header("Location: /");
+                exit;
+            } else {
+                http_response_code(500);
+                require '../views/500.php';
+                exit;
+            }
         } else {
-            echo "Не вдалося отримати назву категорії.";
+            http_response_code(400);
+            echo json_encode(['message' => 'Не вдалося отримати назву категорії']);
+            exit;
         }
     }
 }

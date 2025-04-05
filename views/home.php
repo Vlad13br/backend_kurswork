@@ -49,41 +49,47 @@ ob_start();
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:col-span-3" id="product-list">
-        <?php foreach ($products as $product): ?>
-            <?php $outOfStock = $product['product_stock'] <= 0; ?>
-            <div class="flex flex-col h-full">
-                <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white p-2 border border-gray-300 transition-transform transform hover:scale-105 hover:shadow-xl hover:border-blue-500 cursor-pointer flex flex-col h-full <?= $outOfStock ? 'opacity-50 pointer-events-none' : '' ?>">
-                    <a href="/product/<?= $product['product_id'] ?>">
-                        <?php if (!empty($product['main_image'])): ?>
-                            <img class="w-full h-80 object-contain mb-4 rounded-lg"
-                                 src="<?= htmlspecialchars($product['main_image']) ?>" alt="Зображення товару">
+        <?php if (empty($products)): ?>
+            <p class="text-center text-gray-600">Товарів не знайдено за заданими критеріями.</p>
+        <?php else: ?>
+            <?php foreach ($products as $product): ?>
+                <?php $outOfStock = $product['product_stock'] <= 0; ?>
+                <div class="flex flex-col h-full">
+                    <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white p-2 border border-gray-300 transition-transform transform hover:scale-105 hover:shadow-xl hover:border-blue-500 cursor-pointer flex flex-col h-full <?= $outOfStock ? 'opacity-50 pointer-events-none' : '' ?>">
+                        <a href="/product/<?= $product['product_id'] ?>">
+                            <?php if (!empty($product['main_image'])): ?>
+                                <img class="w-full h-80 object-contain mb-4 rounded-lg"
+                                     src="<?= htmlspecialchars($product['main_image']) ?>" alt="Зображення товару">
+                            <?php endif; ?>
+                            <p class="text-xl font-semibold text-gray-800 mb-2"><?= htmlspecialchars($product['product_name']) ?></p>
+                            <?php
+                            $final_price = $product['product_price'];
+                            if (!empty($product['product_discount']) && $product['product_discount'] > 0) {
+                                $final_price = $product['product_price'] * (1 - $product['product_discount'] / 100);
+                                echo "<p class='text-lg font-medium text-gray-400 line-through mb-2'>" . htmlspecialchars($product['product_price']) . " грн</p>";
+                                echo "<p class='text-xl font-semibold text-red-500 mb-2'>" . number_format($final_price, 2) . " грн</p>";
+                            } else {
+                                echo "<p class='text-lg font-medium text-gray-800 mb-2'>" . htmlspecialchars($product['product_price']) . " грн</p>";
+                            }
+                            ?>
+                        </a>
+                        <div class="flex-grow"></div>
+                        <?php if (!$outOfStock): ?>
+                            <button class="add-to-cart-btn bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700"
+                                    data-name="<?= htmlspecialchars($product['product_name']) ?>"
+                                    data-price="<?= $final_price ?>"
+                                    data-image="<?= htmlspecialchars($product['main_image']) ?>"
+                                    data-product-id="<?= $product['product_id'] ?>">Купити
+                            </button>
+                        <?php else: ?>
+                            <p class="text-red-500 text-center font-semibold mt-2">Немає в наявності</p>
                         <?php endif; ?>
-                        <p class="text-xl font-semibold text-gray-800 mb-2"><?= htmlspecialchars($product['product_name']) ?></p>
-                        <?php
-                        $final_price = $product['product_price'];
-                        if (!empty($product['product_discount']) && $product['product_discount'] > 0) {
-                            $final_price = $product['product_price'] * (1 - $product['product_discount'] / 100);
-                            echo "<p class='text-lg font-medium text-gray-400 line-through mb-2'>" . htmlspecialchars($product['product_price']) . " грн</p>";
-                            echo "<p class='text-xl font-semibold text-red-500 mb-2'>" . number_format($final_price, 2) . " грн</p>";
-                        } else {
-                            echo "<p class='text-lg font-medium text-gray-800 mb-2'>" . htmlspecialchars($product['product_price']) . " грн</p>";
-                        }
-                        ?>
-                    </a>
-                    <div class="flex-grow"></div>
-                    <?php if (!$outOfStock): ?>
-                        <button class="add-to-cart-btn bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-700"
-                                data-name="<?= htmlspecialchars($product['product_name']) ?>"
-                                data-price="<?= $final_price ?>"
-                                data-image="<?= htmlspecialchars($product['main_image']) ?>"
-                                data-product-id="<?= $product['product_id'] ?>">Купити
-                        </button>
-                    <?php else: ?>
-                        <p class="text-red-500 text-center font-semibold mt-2">Немає в наявності</p>
-                    <?php endif; ?>
+                    </div>
                 </div>
-            </div>
-        <?php endforeach; ?>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+
     </div>
 </div>
 

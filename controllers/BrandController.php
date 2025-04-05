@@ -10,6 +10,7 @@ class BrandController
         $brands = $brandModel->getAllBrands();
         $additionalScripts = '/scripts/brand/brandForm.js';
 
+        http_response_code(200);
         require '../views/brand/add-brand.php';
     }
 
