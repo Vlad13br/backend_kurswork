@@ -26,6 +26,7 @@ class Router
     private function mapRoutes()
     {
         $this->router->map('GET', '/', 'HomeController#index');
+        $this->router->map('GET', '/fetch', 'HomeController#fetch');
         $this->router->map('GET', '/home', 'HomeController#index');
         $this->router->map('GET', '/product/[i:id]', 'ProductController#getProduct');
 

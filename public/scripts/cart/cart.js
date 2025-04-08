@@ -54,28 +54,3 @@ function showCart() {
 function closeCart() {
     document.getElementById('cart-modal').classList.add('hidden');
 }
-
-function applySort() {
-    event.preventDefault();
-    const sort = document.getElementById('sort').value;
-    const params = new URLSearchParams(window.location.search);
-
-    params.set('sort', sort);
-
-    window.location.href = '?' + params.toString();
-}
-
-function applyFilter(event) {
-    event.preventDefault();
-
-    const minPrice = document.querySelector('input[name="min_price"]').value;
-    const maxPrice = document.querySelector('input[name="max_price"]').value;
-    const category = document.querySelector('select[name="category"]').value;
-    const params = new URLSearchParams(window.location.search);
-
-    params.set('min_price', minPrice);
-    params.set('max_price', maxPrice);
-    params.set('category', category);
-
-    window.location.href = '?' + params.toString();
-}

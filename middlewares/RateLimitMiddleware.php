@@ -2,7 +2,7 @@
 
 class RateLimitMiddleware
 {
-    private static $rateLimit = 20;
+    private static $rateLimit = 30;
     private static $timeWindow = 60;
 
     public static function handle()

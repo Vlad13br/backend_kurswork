@@ -11,10 +11,8 @@ class Product
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function getAllProducts($page = 1, $limit = 12, $sort = 'newest', $minPrice = null, $maxPrice = null, $category = null)
+    public function getAllProducts($sort = 'newest', $minPrice = null, $maxPrice = null, $category = null)
     {
-        $offset = ($page - 1) * $limit;
-
         $orderBy = "p.created_at DESC";
 
         if ($sort === 'price_asc') {
@@ -55,45 +53,15 @@ class Product
         JOIN brands b ON p.brand_id = b.id
         $whereSql
         ORDER BY p.stock = 0, $orderBy
-        LIMIT :limit OFFSET :offset
     ");
 
         if ($minPrice) $stmt->bindParam(':min_price', $minPrice, PDO::PARAM_INT);
         if ($maxPrice) $stmt->bindParam(':max_price', $maxPrice, PDO::PARAM_INT);
         if ($category) $stmt->bindParam(':category', $category, PDO::PARAM_INT);
 
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function getTotalProductCount($minPrice = null, $maxPrice = null, $category = null)
-    {
-        $query = "SELECT COUNT(*) FROM products p";
-
-        $params = [];
-
-        if ($minPrice !== null) {
-            $query .= " WHERE p.price >= :min_price";
-            $params[':min_price'] = $minPrice;
-        }
-
-        if ($maxPrice !== null) {
-            $query .= $minPrice !== null ? " AND p.price <= :max_price" : " WHERE p.price <= :max_price";
-            $params[':max_price'] = $maxPrice;
-        }
-
-        if ($category !== null) {
-            $query .= ($minPrice !== null || $maxPrice !== null) ? " AND p.category_id = :category" : " WHERE p.category_id = :category";
-            $params[':category'] = $category;
-        }
-
-        $stmt = $this->db->prepare($query);
-        $stmt->execute($params);
-
-        return $stmt->fetchColumn();
     }
 
     public function getProductById($product_id)
