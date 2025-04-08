@@ -25,7 +25,8 @@ if (session_status() === PHP_SESSION_NONE) {
                 <a href="/add-product" class="hover:text-blue-200">Додати товар</a>
                 <a href="/logout" class="hover:text-blue-200">Вийти</a>
             <?php elseif (isset($_SESSION['user_id'])): ?>
-                <a href="/profile" class="hover:text-blue-200">Профіль</a>
+                <a href="/profile" class="hover:text-blue-200 ">Профіль</a>
+                <a href="/cart" class="hover:text-blue-200">Кошик</a>
                 <a href="/logout" class="hover:text-blue-200">Вийти</a>
             <?php else: ?>
                 <a href="/login" class="hover:text-blue-200">Увійти</a>
@@ -46,7 +47,6 @@ if (session_status() === PHP_SESSION_NONE) {
 <?php if (isset($additionalScripts1)): ?>
     <script src="<?= $additionalScripts1; ?>"></script>
 <?php endif; ?>
-
 
 </body>
 </html>

@@ -37,6 +37,7 @@ document.getElementById("commentForm").addEventListener("submit", function (even
             `;
                 commentList.appendChild(newComment);
                 commentForm.reset();
+                document.getElementById("noCommentsMessage").style.display = "none";
             } else {
                 alert(data.message);
             }
@@ -69,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (data.status === "success") {
                         this.closest("li").remove();
                         if (document.querySelectorAll("#commentList li").length === 0) {
-                            document.getElementById("noCommentsMessage").style.display = "block";
+                            document.getElementById("commentList").style.display = "none";
                         }
                     } else {
                         alert("Помилка: " + data.message);

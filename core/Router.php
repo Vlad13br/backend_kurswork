@@ -11,6 +11,7 @@ require_once '../controllers/AdminController.php';
 
 require_once '../middlewares/AuthMiddleware.php';
 require_once '../middlewares/AdminMiddleware.php';
+require_once '../middlewares/RateLimitMiddleware.php';
 
 class Router
 {
@@ -37,14 +38,13 @@ class Router
         $this->router->map('GET', '/logout', 'AuthController#logout');
 
         $this->router->map('GET', '/profile', 'ProfileController#showProfile', 'auth_profile');
+        $this->router->map('GET', '/cart', 'ProfileController#showCart', 'auth_cart');
         $this->router->map('POST', '/update-profile', 'ProfileController#updateProfile', 'auth_update_profile');
         $this->router->map('POST', '/change-password', 'ProfileController#changePassword', 'auth_change_password');
-
         $this->router->map('GET', '/get-cart', 'CartController#showCart');
         $this->router->map('POST', '/add-to-cart', 'CartController#addToCart');
         $this->router->map('POST', '/update-cart', 'CartController#updateCart');
         $this->router->map('POST', '/remove-from-cart', 'CartController#removeFromCart');
-
         $this->router->map('POST', '/place-order', 'CartController#placeOrder', 'auth_place_order');
 
         $this->router->map('GET', '/admin', 'AdminController#showProfile', 'admin_dashboard');
@@ -68,6 +68,7 @@ class Router
 
         if ($match) {
             list($controllerName, $method) = explode('#', $match['target']);
+                RateLimitMiddleware::handle();
 
             if (isset($match['name'])) {
                 if (str_starts_with($match['name'], 'auth')) {

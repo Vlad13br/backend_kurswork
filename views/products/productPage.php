@@ -150,9 +150,9 @@ ob_start();
                 Продовжити покупки
             </button>
             <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="/profile" class=" bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Оформити замовлення</a>
+                <a href="/cart" class=" bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Оформити замовлення</a>
             <?php else: ?>
-                <a href="/profile" class=" bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Увійти для оформлення замовлення</a>
+                <a href="/cart" class=" bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">Увійти для оформлення замовлення</a>
             <?php endif; ?>
         </div>
     </div>

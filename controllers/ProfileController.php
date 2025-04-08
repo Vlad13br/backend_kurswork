@@ -30,7 +30,6 @@ class ProfileController
         $additionalScripts = '/scripts/profile/profile.js';
         require '../views/profile/profile.php';
     }
-
     public function updateProfile()
     {
         if (!isset($_SESSION['user_id'])) {
@@ -62,6 +61,19 @@ class ProfileController
             exit;
         }
         exit;
+    }
+    public function showCart()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            header('Location: /login');
+            exit;
+        }
+
+        $cartItems = $_SESSION['cart'] ?? [];
+
+        $additionalScripts = '/scripts/profile/cart.js';
+        require '../views/profile/cart.php';
     }
 
     public function changePassword()

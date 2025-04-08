@@ -23,7 +23,7 @@ ob_start();
 
     <div class="mb-4">
         <label for="password" class="block text-gray-700">Пароль</label>
-        <input type="password" id="password" name="password" required class="w-full p-2 border border-gray-300 rounded mt-2" placeholder="Введіть ваш пароль">
+        <input type="password" id="password" name="password" required minlength="8" class="w-full p-2 border border-gray-300 rounded mt-2" placeholder="Введіть ваш пароль">
     </div>
 
     <button type="submit" class="w-full p-2 bg-blue-500 text-white rounded mt-4">Зареєструватися</button>
